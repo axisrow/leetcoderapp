@@ -10,6 +10,7 @@ import AIComponent from "./CheckAnswer.js";
 import AIPuzzle from "./components/Puzzles.js";
 import RegisterForm from "./components/RegisterForm.js";
 import LoginForm from "./components/LoginPage.js";
+import TestStream from "./TestStream.js";
 
 const Stack = createStackNavigator();
 
@@ -80,6 +81,12 @@ export default function Navigate() {
           name="puzzle"
           component={AIPuzzle}
           options={{ title: "Puzzle" }}
+        />
+
+        <Stack.Screen
+          name="teststream"
+          component={TestStream}
+          options={{ title: "Stream Test" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

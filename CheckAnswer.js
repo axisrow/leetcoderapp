@@ -20,69 +20,69 @@ const AIComponent = () => {
 
 
   const run = useCallback(async () => {
-
+    localStorage.setItem('debug_questionx', questionx || 'undefined');
+    console.log('Saved to localStorage. Run in console: copy(localStorage.getItem("debug_questionx"))');
     setIsLoading(true);
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
-    const generationConfig = {
-      temperature: 1.0,
-      topK: 1,
-      topP: 1,
-      maxOutputTokens: 2048,
-    };
+    try {
+      const genAI = new GoogleGenerativeAI(API_KEY);
+      const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+      console.log('Sending request...');
 
-    const safetySettings = [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-    ];
+      const result = await model.generateContentStream({
+        contents: [{
+          role: "user",
+          parts: [{
+            text: `Write 3 different JavaScript solutions to the following problem, with explanations:
 
+**Problem:**
+${questionx}
 
-    const parts = [
-      {
-        text: `Write 3 different JavaScript solutions to the following problem, with explanations in English:
+Provide 3 different solutions, each with an explanation.`,
+          }],
+        }],
+        generationConfig: {
+          temperature: 1.0,
+          topK: 1,
+          topP: 1,
+        },
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+        ],
+      });
 
-    **Problem:**
-    
-    ${questionx}
-    
-    **Output:**
-    
-    The AI should provide 3 different solutions to the problem, each with an explanation.
-    
-    **Additional:**
-    
-    * The AI may use different coding styles for each solution.
-    * The AI may add comments to the code to make it more readable.`,
-      },
-    ];
+      console.log('Result:', result);
+      console.log('Result.stream:', result.stream);
+      console.log('Result.response:', result.response);
+      console.log('Got stream, reading chunks...');
 
-    const result = await model.generateContentStream({
-      contents: [{ role: "user", parts }],
-      generationConfig,
-      safetySettings,
-    });
-
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      fullText += chunk.text();
-      setReslt(fullText);
+      let fullText = '';
+      for await (const chunk of result.stream) {
+        console.log('Chunk received');
+        fullText += chunk.text();
+        setReslt(fullText);
+      }
+      console.log('Done, total length:', fullText.length);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error:', error);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, View,Alert } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, View, Alert, Image } from "react-native";
 import { Text } from "react-native-paper";
 import { Button } from "@rneui/themed";
 import axios from "axios";
@@ -10,6 +10,7 @@ const TaskList = () => {
   const navigation = useNavigation();
   const [expanded, setExpanded] = useState(true);
   const [randomTask, setRandomTask] = useState();
+  const [isLoading, setIsLoading] = useState(true);
   const [tasks, setTasks] = useState({
     easy: [],
     medium: [],
@@ -28,8 +29,10 @@ const TaskList = () => {
           medium: mediumTasks.data,
           hard: hardTasks.data,
         });
+        setIsLoading(false);
       } catch (error) {
         console.error("Tasks fetching error:", error);
+        setIsLoading(false);
       }
     };
 
@@ -37,15 +40,29 @@ const TaskList = () => {
   }, []);
 
   const selectRandomTask = (cat) => {
-    try {
-      const randomTask = cat[Math.floor(Math.random() * cat.length)];
-      navigation.navigate("Daily", { randtask: randomTask.titleslug });
-    } catch (err) {
-      alert('Task Not Found');
+    if (!cat || cat.length === 0) {
+      alert('Tasks are loading... Please wait');
+      return;
     }
+    const randomTask = cat[Math.floor(Math.random() * cat.length)];
+    navigation.navigate("Daily", { randtask: randomTask.titleslug });
   };
 
   const handlePress = () => setExpanded(!expanded);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Image
+          source={require('./loading.gif')}
+          style={{ width: 200, height: 200 }}
+        />
+        <Text style={{ color: "lightblue", marginTop: 20 }}>
+          Loading tasks...
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
