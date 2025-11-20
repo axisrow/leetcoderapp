@@ -6,7 +6,7 @@ import {
 
 import dotenv from "dotenv";
 
-const MODEL_NAME = "gemini-1.0-pro";
+const MODEL_NAME = "gemini-2.5-flash";
 const API_KEY = "YOUR_API_KEY";
 
 async function run() {

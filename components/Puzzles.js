@@ -60,7 +60,7 @@ const AIPuzzle = () => {
   const run = useCallback(async () => {
     setIsLoading(true);
     const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const generationConfig = {
       temperature: 0.9,
@@ -106,21 +106,24 @@ const AIPuzzle = () => {
     //   const check = [ {text: `What answer to ${reslt}`,
     // },]
 
-    const result = await model.generateContent({
+    const result = await model.generateContentStream({
       contents: [{ role: "user", parts }],
       generationConfig,
       safetySettings,
     });
 
-    const response = result.response;
-    setReslt(response.text());
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      fullText += chunk.text();
+      setReslt(fullText);
+    }
     setIsLoading(false);
   }, []);
 
   const runCheck = useCallback(async () => {
     setIsLoading(true);
     const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const generationConfig = {
       temperature: 0.9,
@@ -154,14 +157,17 @@ const AIPuzzle = () => {
       },
     ];
 
-    const result = await model.generateContent({
+    const result = await model.generateContentStream({
       contents: [{ role: "user", parts }],
       generationConfig,
       safetySettings,
     });
 
-    const response = result.response;
-   setAnswers(response.text());
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      fullText += chunk.text();
+      setAnswers(fullText);
+    }
     setIsLoading(false);
   }, [reslt]);
 
@@ -170,10 +176,11 @@ const AIPuzzle = () => {
  
 
   return (
-    <ScrollView >
+    <ScrollView testID="scroll-view">
       {isLoading && <Image
   source={require('../loading.gif')}
   style={{ width: '100%', height: '100%' }}
+  testID="loading-image"
 />}
       <Button color={"primary"} onPress={run} title="Run AI">
         Generate New Quiz

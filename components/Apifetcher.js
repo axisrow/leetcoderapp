@@ -31,7 +31,7 @@ const Apifetcher = ({route}) => {
 
     setIsLoading(true);
     const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const generationConfig = {
       temperature: 0.9,
@@ -72,14 +72,17 @@ const Apifetcher = ({route}) => {
       },
     ];
 
-    const result = await model.generateContent({
+    const result = await model.generateContentStream({
       contents: [{ role: "user", parts }],
       generationConfig,
       safetySettings,
     });
 
-    const response = result.response;
-    setReslt(response.text());
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      fullText += chunk.text();
+      setReslt(fullText);
+    }
     setIsLoading(false);
   }, []);
 
@@ -89,14 +92,15 @@ const Apifetcher = ({route}) => {
   }, []);
 
   return (
-    <ScrollView>
+    <ScrollView testID="scroll-view">
       {isLoading && <Image
   source={{url:'https://i.gifer.com/4Mg1.gif'}}
   style={{ width: 380, height: 800,objectFit:'cover' }}
+  testID="loading-image"
 />}
-      
+
         { reslt && <Markdown value={reslt}/>}
-      
+
       <Button
           color={'primary'}
           onPress={fetchSolution}

@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useRef,useEffect } from "react";
-import { View, SafeAreaView, ScrollView,Image } from "react-native";
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import { View, SafeAreaView, ScrollView, Image } from "react-native";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import {
   GoogleGenerativeAI,
@@ -9,7 +9,7 @@ import {
 import Markdown from "react-native-marked";
 import { useRoute } from '@react-navigation/native';
 
-const MODEL_NAME = "gemini-1.0-pro";
+const MODEL_NAME = "gemini-2.5-flash";
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
 const AIComponent = () => {
@@ -23,10 +23,10 @@ const AIComponent = () => {
 
     setIsLoading(true);
     const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
     const generationConfig = {
-      temperature: 0.9,
+      temperature: 1.0,
       topK: 1,
       topP: 1,
       maxOutputTokens: 2048,
@@ -71,14 +71,17 @@ const AIComponent = () => {
       },
     ];
 
-    const result = await model.generateContent({
+    const result = await model.generateContentStream({
       contents: [{ role: "user", parts }],
       generationConfig,
       safetySettings,
     });
 
-    const response = result.response;
-    setReslt(response.text());
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      fullText += chunk.text();
+      setReslt(fullText);
+    }
     setIsLoading(false);
   }, []);
 
@@ -88,14 +91,15 @@ const AIComponent = () => {
   }, []);
 
   return (
-    <ScrollView>
+    <ScrollView testID="scroll-view">
       {isLoading && <Image
-  source={require('./loading.gif')}
-  style={{ width: '100%', height: '100%' }}
-/>}
-  
-        { reslt && <Markdown value={reslt}/>}
-    
+        source={require('./loading.gif')}
+        style={{ width: '100%', height: '100%' }}
+        testID="loading-image"
+      />}
+
+      {reslt && <Markdown value={reslt} />}
+
     </ScrollView>
   );
 };
