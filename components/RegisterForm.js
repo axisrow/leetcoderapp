@@ -10,17 +10,16 @@ const RegisterForm = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = () => {
-    axios.post('https://leetcoderx.onrender.com/register', { name, email, password })
-      .then((response) => {
-        const token = response.data.token;
-        AsyncStorage.setItem('token', token);
-        alert('New accout created');
-        navigation.navigate('Login');
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('https://leetcoderx.onrender.com/register', { name, email, password });
+      const token = response.data.token;
+      await AsyncStorage.setItem('token', token);
+      alert('New account created');
+      navigation.navigate('Login');
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -30,19 +29,19 @@ const RegisterForm = ({navigation}) => {
         style={styles.input}
         placeholder="Name"
         value={name}
-        onChangeText={(text) => setName(text)}
+        onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="Email"
         value={email}
-        onChangeText={(text) => setEmail(text)}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         value={password}
-        onChangeText={(text) => setPassword(text)}
+        onChangeText={setPassword}
         secureTextEntry
       />
       <Button title="Register" onPress={handleSubmit} />

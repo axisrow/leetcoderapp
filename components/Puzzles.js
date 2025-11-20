@@ -46,13 +46,13 @@ const AIPuzzle = () => {
   const difficulty = ["EASY", "MEDIUM", "HARD"];
   const types = ["TRUE/FALSE", "ONE-CHOICE", "MULTI-CHOICE", "MISSING CODE"];
 
-  const random = (arr) => arr[Math.floor(Math.random() * arr.length)]
+  const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  const randomTheme = random(themes);
-  const randomDifficulty = random(difficulty);
-  const randomType = random(types);
-  const randomNum = Math.floor(Math.random() * 10);
-  const [answers,setAnswers] = useState();
+  const [randomTheme] = useState(() => random(themes));
+  const [randomDifficulty] = useState(() => random(difficulty));
+  const [randomType] = useState(() => random(types));
+  const [randomNum] = useState(() => Math.floor(Math.random() * 10));
+  const [answers, setAnswers] = useState();
 
 
   

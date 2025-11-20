@@ -20,8 +20,6 @@ const AIComponent = () => {
 
 
   const run = useCallback(async () => {
-    localStorage.setItem('debug_questionx', questionx || 'undefined');
-    console.log('Saved to localStorage. Run in console: copy(localStorage.getItem("debug_questionx"))');
     setIsLoading(true);
 
     try {
@@ -83,12 +81,11 @@ Provide 3 different solutions, each with an explanation.`,
       console.error('Error:', error);
       setIsLoading(false);
     }
-  }, []);
-
+  }, [questionx]);
 
   useEffect(() => {
     run();
-  }, []);
+  }, [run]);
 
   return (
     <ScrollView testID="scroll-view">

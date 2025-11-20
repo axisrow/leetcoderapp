@@ -15,24 +15,24 @@ import { useNavigation } from "@react-navigation/native";
 const LoginForm = () => {
   const navigation = useNavigation();
   
-  const [email, setEmail] = useState('user@site.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   
 
-  const handleSubmit = () => {
-    axios.post('https://leetcoderx.onrender.com/login', { email, password })
-      .then((response) => {
-        const token = response.data.token;
-        AsyncStorage.setItem('token', token);
-        navigation.navigate('Homepage');
-        alert(`Hello ${email}`);
-      })
-      .catch((error) => {
-        if(error.response && error.response.status === 401){
-          alert('Member not found')
-        }else{
-        alert(error.message)};
-      });
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('https://leetcoderx.onrender.com/login', { email, password });
+      const token = response.data.token;
+      await AsyncStorage.setItem('token', token);
+      navigation.navigate('Homepage');
+      alert(`Hello ${email}`);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert('Member not found');
+      } else {
+        alert(error.message);
+      }
+    }
   };
 
   const register =() =>{
@@ -50,13 +50,13 @@ const LoginForm = () => {
         style={styles.input}
         placeholder="Email"
         value={email}
-        onChangeText={(text) => setEmail(text)}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         value={password}
-        onChangeText={(text) => setPassword(text)}
+        onChangeText={setPassword}
         secureTextEntry
       />
       <Button title="Log In" onPress={handleSubmit} />

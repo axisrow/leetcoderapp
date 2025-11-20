@@ -27,65 +27,71 @@ const Apifetcher = ({route}) => {
   };
 
 
-  const run = useCallback(async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    let isMounted = true;
 
-    try {
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const run = async () => {
+      setIsLoading(true);
 
-      const result = await model.generateContentStream({
-        contents: [{
-          role: "user",
-          parts: [{
-            text: `Write description and question of this Leetcode problem without answer:
+      try {
+        const genAI = new GoogleGenerativeAI(API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        const result = await model.generateContentStream({
+          contents: [{
+            role: "user",
+            parts: [{
+              text: `Write description and question of this Leetcode problem without answer:
 
 **Problem:**
 ${randtask}`,
+            }],
           }],
-        }],
-        generationConfig: {
-          temperature: 0.9,
-          topK: 1,
-          topP: 1,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          generationConfig: {
+            temperature: 0.9,
+            topK: 1,
+            topP: 1,
+            maxOutputTokens: 2048,
           },
-          {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-        ],
-      });
+          safetySettings: [
+            {
+              category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            },
+            {
+              category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            },
+            {
+              category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            },
+            {
+              category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            },
+          ],
+        });
 
-      let fullText = '';
-      for await (const chunk of result.stream) {
-        fullText += chunk.text();
-        setReslt(fullText);
+        let fullText = '';
+        for await (const chunk of result.stream) {
+          if (!isMounted) break;
+          fullText += chunk.text();
+          setReslt(fullText);
+        }
+        if (isMounted) setIsLoading(false);
+      } catch (error) {
+        console.error('Error:', error.message);
+        if (isMounted) setIsLoading(false);
       }
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error:', error.message);
-      setIsLoading(false);
-    }
-  }, []);
+    };
 
-
-  useEffect(() => {
     run();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [randtask]);
 
   return (
     <ScrollView testID="scroll-view">

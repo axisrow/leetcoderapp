@@ -31,7 +31,7 @@ export const Example = ({ navigation }) => {
     }
   }
   
-  executeCode = () => {
+  const executeCode = () => {
     try {
       const evaluatedResult = safeEval(code);
       setResult(evaluatedResult);
@@ -45,7 +45,7 @@ export const Example = ({ navigation }) => {
     <ScrollView style={{ flex: 1 }}>
       <CodeEditor
         value={code}
-        onChange={(code) => setCode(code)}
+        onChange={setCode}
         style={{
           flex: 1,
           width: "100%",

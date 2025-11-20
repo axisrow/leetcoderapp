@@ -32,6 +32,7 @@ const TaskList = () => {
         setIsLoading(false);
       } catch (error) {
         console.error("Tasks fetching error:", error);
+        Alert.alert('Error', 'Failed to load tasks. Please try again.');
         setIsLoading(false);
       }
     };
