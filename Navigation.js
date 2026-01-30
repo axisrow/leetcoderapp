@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ApiFetcher } from "./components/ApiLeetcode.js";
 import { Example } from "./components/СodeForm";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -10,6 +10,8 @@ import AIComponent from "./CheckAnswer.js";
 import AIPuzzle from "./components/Puzzles.js";
 import RegisterForm from "./components/RegisterForm.js";
 import LoginForm from "./components/LoginPage.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 const Stack = createStackNavigator();
 
@@ -18,8 +20,7 @@ const AuthStack = createStackNavigator();
 export function AuthStackNavigate() {
   return (
     <AuthStack.Navigator
-      screenOptions={{ presentation: "modal" }}
-      headerShown="false"
+      screenOptions={{ presentation: "modal", headerShown: false }}
     >
       <AuthStack.Screen
         name="Login"
@@ -36,9 +37,32 @@ export function AuthStackNavigate() {
 }
 
 export default function Navigate() {
+  const [initialRoute, setInitialRoute] = useState(null);
+  const [checkingToken, setCheckingToken] = useState(true);
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        setInitialRoute(token ? "Homepage" : "Auth");
+      } catch (error) {
+        console.warn("Failed to read token from storage", error);
+        setInitialRoute("Auth");
+      } finally {
+        setCheckingToken(false);
+      }
+    };
+
+    checkToken();
+  }, []);
+
+  if (checkingToken || !initialRoute) {
+    return <LoadingSpinner text="Загрузка..." />;
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={initialRoute}>
 
         <Stack.Screen
           name="Auth"

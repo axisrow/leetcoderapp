@@ -4,29 +4,34 @@ import {
   useWindowDimensions,
   ScrollView,
   View,
-  Image,
   Alert,
   Platform,
-  Text
+  Text,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
-import { Input} from "@rneui/themed";
-import { Button } from "@rneui/base";
 import {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } from "@google/generative-ai";
-import Markdown from "react-native-marked";
+import { useTheme } from '../ThemeContext';
+import { typography, spacing, borderRadius, shadows } from '../styles';
+import LoadingSpinner from './LoadingSpinner';
+import ThemedMarkdown from './ThemedMarkdown';
+import ThemeToggle from './ThemeToggle';
 
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
 const AIPuzzle = () => {
+  const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const windowWidth = useWindowDimensions().width;
   const [reslt, setReslt] = useState();
-
-  const answer = useRef("");
-
+  const [userAnswer, setUserAnswer] = useState("");
+  const [feedback, setFeedback] = useState();
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [answers, setAnswers] = useState();
 
   const themes = [
     "Variables",
@@ -52,13 +57,13 @@ const AIPuzzle = () => {
   const [randomDifficulty] = useState(() => random(difficulty));
   const [randomType] = useState(() => random(types));
   const [randomNum] = useState(() => Math.floor(Math.random() * 10));
-  const [answers, setAnswers] = useState();
-
-
-  
 
   const run = useCallback(async () => {
     setIsLoading(true);
+    setUserAnswer("");
+    setFeedback(null);
+    setShowCorrectAnswer(false);
+    setAnswers(null);
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
@@ -113,6 +118,71 @@ Number of questions: ${randomNum}`,
     }
   }, []);
 
+  const submitAnswer = useCallback(async () => {
+    if (!userAnswer.trim()) {
+      Alert.alert('Ошибка', 'Пожалуйста, введите ваш ответ');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const genAI = new GoogleGenerativeAI(API_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      const result = await model.generateContentStream({
+        contents: [{
+          role: "user",
+          parts: [{
+            text: `Analyze the user's answer to this quiz and provide constructive feedback. Tell them if they're on the right track and explain why their answer is correct or incorrect. Be encouraging and educational.
+
+Quiz:
+${reslt}
+
+User's Answer:
+${userAnswer}
+
+Provide feedback without revealing the correct answer yet. Focus on their thinking process.`,
+          }],
+        }],
+        generationConfig: {
+          temperature: 0.9,
+          topK: 1,
+          topP: 1,
+          maxOutputTokens: 2048,
+        },
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+        ],
+      });
+
+      let fullText = '';
+      for await (const chunk of result.stream) {
+        fullText += chunk.text();
+        setFeedback(fullText);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error:', error.message);
+      setIsLoading(false);
+    }
+  }, [reslt, userAnswer]);
+
   const runCheck = useCallback(async () => {
     setIsLoading(true);
 
@@ -158,6 +228,7 @@ Number of questions: ${randomNum}`,
         fullText += chunk.text();
         setAnswers(fullText);
       }
+      setShowCorrectAnswer(true);
       setIsLoading(false);
     } catch (error) {
       console.error('Error:', error.message);
@@ -165,53 +236,178 @@ Number of questions: ${randomNum}`,
     }
   }, [reslt]);
 
-  
-
- 
+  if (isLoading) {
+    return <LoadingSpinner text="Загрузка..." />;
+  }
 
   return (
-    <ScrollView testID="scroll-view">
-      {isLoading && <Image
-  source={require('../loading.gif')}
-  style={{ width: '100%', height: '100%' }}
-  testID="loading-image"
-/>}
-      <Button color={"primary"} onPress={run} title="Run AI">
-        Generate New Quiz
-      </Button>
-      
-      <Text >{randomTheme}</Text>
-      <Text >{randomDifficulty}</Text>
-      <Text >{randomType}</Text>
-      
-        {reslt && <Markdown value={reslt} />}
-        <Text style={{color:'red'}}>Answer:</Text>
-        {answers && <Markdown value={answers} />}
-    
-      <Button
-        title={"Check"}
-        color={"warning"}
-        onPress={() => {reslt &&
-          runCheck();
-        }}
-      />
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.themeToggleContainer}>
+        <ThemeToggle />
+      </View>
+
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colors.text }]}>JavaScript Puzzles</Text>
+        <TouchableOpacity
+          style={[styles.button, styles.buttonPrimary, { backgroundColor: colors.primary }]}
+          onPress={run}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.buttonText, { color: colors.text }]}>🎲 Generate New Quiz</Text>
+        </TouchableOpacity>
+      </View>
+
+      {reslt && (
+        <View style={styles.quizContainer}>
+          <View style={styles.quizInfo}>
+            <View style={[styles.badge, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
+              <Text style={[styles.badgeText, { color: colors.textSecondary }]}>📚 {randomTheme}</Text>
+            </View>
+            <View style={[styles.badge, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
+              <Text style={[styles.badgeText, { color: colors.textSecondary }]}>⚡ {randomDifficulty}</Text>
+            </View>
+            <View style={[styles.badge, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
+              <Text style={[styles.badgeText, { color: colors.textSecondary }]}>📝 {randomType}</Text>
+            </View>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Question:</Text>
+            <ThemedMarkdown value={reslt} />
+          </View>
+
+          <View style={styles.answerSection}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Answer:</Text>
+            <TextInput
+              style={[styles.textArea, { backgroundColor: colors.backgroundLight, borderColor: colors.border, color: colors.text }]}
+              placeholder="Enter your answer here..."
+              placeholderTextColor={colors.textMuted}
+              value={userAnswer}
+              onChangeText={setUserAnswer}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+
+            <TouchableOpacity
+              style={[styles.button, styles.buttonSuccess, { backgroundColor: colors.success }]}
+              onPress={submitAnswer}
+              activeOpacity={0.8}
+              disabled={!userAnswer.trim()}
+            >
+              <Text style={[styles.buttonText, { color: colors.text }]}>✅ Submit Answer</Text>
+            </TouchableOpacity>
+          </View>
+
+          {feedback && (
+            <View style={[styles.card, styles.feedbackCard, { backgroundColor: colors.backgroundLight, borderColor: colors.border, borderLeftColor: colors.info }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>💡 Feedback:</Text>
+              <ThemedMarkdown value={feedback} />
+            </View>
+          )}
+
+          {!showCorrectAnswer && (
+            <TouchableOpacity
+              style={[styles.button, styles.buttonWarning, { backgroundColor: colors.warning }]}
+              onPress={runCheck}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.buttonText, { color: colors.text }]}>🔍 Show Correct Answer</Text>
+            </TouchableOpacity>
+          )}
+
+          {showCorrectAnswer && answers && (
+            <View style={[styles.card, styles.answerCard, { backgroundColor: colors.backgroundLight, borderColor: colors.border, borderLeftColor: colors.success }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>✨ Correct Answer:</Text>
+              <ThemedMarkdown value={answers} />
+            </View>
+          )}
+        </View>
+      )}
     </ScrollView>
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,65,121,1) 35%, rgba(0,212,255,1) 100%)",
-    alignItems: "center",
-    justifyContent: "center",
   },
-  scrollView: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 5,
-    marginLeft: 5,
+  themeToggleContainer: {
+    alignSelf: 'flex-end',
+    marginBottom: spacing.md,
+  },
+  scrollContent: {
+    padding: spacing.lg,
+  },
+  header: {
+    marginBottom: spacing.xl,
+  },
+  title: {
+    ...typography.h1,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  quizContainer: {
+    gap: spacing.lg,
+  },
+  quizInfo: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  badge: {
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+  },
+  badgeText: {
+    ...typography.caption,
+    fontWeight: '600',
+  },
+  card: {
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    ...shadows.md,
+  },
+  feedbackCard: {
+    borderLeftWidth: 4,
+  },
+  answerCard: {
+    borderLeftWidth: 4,
+  },
+  sectionTitle: {
+    ...typography.h3,
+    marginBottom: spacing.md,
+  },
+  answerSection: {
+    gap: spacing.md,
+  },
+  textArea: {
+    borderWidth: 2,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    fontSize: 16,
+    minHeight: 120,
+    ...shadows.sm,
+  },
+  button: {
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.md,
+  },
+  buttonPrimary: {},
+  buttonSuccess: {},
+  buttonWarning: {},
+  buttonText: {
+    ...typography.body,
+    fontWeight: '700',
+    fontSize: 16,
   },
 });
 

@@ -1,18 +1,21 @@
 import React, { useCallback, useState, useRef, useEffect } from "react";
-import { View, SafeAreaView, ScrollView, Image } from "react-native";
-import { Button, Text, ActivityIndicator } from "react-native-paper";
+import { View, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } from "@google/generative-ai";
-import Markdown from "react-native-marked";
 import { useRoute } from '@react-navigation/native';
+import { useTheme } from './ThemeContext';
+import { typography, spacing, borderRadius, shadows } from './styles';
+import ThemedMarkdown from './components/ThemedMarkdown';
+import LoadingSpinner from './components/LoadingSpinner';
+import ThemeToggle from './components/ThemeToggle';
 
-const MODEL_NAME = "gemini-2.5-flash";
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
 const AIComponent = () => {
+  const { colors } = useTheme();
   const route = useRoute();
   const { questionx } = route.params;
   const [reslt, setReslt] = useState();
@@ -24,8 +27,7 @@ const AIComponent = () => {
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-      console.log('Sending request...');
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       const result = await model.generateContentStream({
         contents: [{
@@ -87,18 +89,66 @@ Provide 3 different solutions, each with an explanation.`,
     run();
   }, [run]);
 
+  if (isLoading) {
+    return <LoadingSpinner text="Generating solutions..." />;
+  }
+
   return (
-    <ScrollView testID="scroll-view">
-      {isLoading && <Image
-        source={require('./loading.gif')}
-        style={{ width: '100%', height: '100%' }}
-        testID="loading-image"
-      />}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.themeToggleContainer}>
+        <ThemeToggle />
+      </View>
 
-      {reslt && <Markdown value={reslt} />}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>✨ Optimal Solutions</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Multiple approaches to solve this problem
+          </Text>
+        </View>
 
-    </ScrollView>
+        {reslt && (
+          <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
+            <ThemedMarkdown value={reslt} />
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  themeToggleContainer: {
+    position: 'absolute',
+    top: spacing.lg,
+    right: spacing.lg,
+    zIndex: 10,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: spacing.lg,
+  },
+  header: {
+    marginBottom: spacing.xl,
+  },
+  title: {
+    ...typography.h1,
+    marginBottom: spacing.sm,
+  },
+  subtitle: {
+    ...typography.body,
+  },
+  card: {
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    ...shadows.md,
+  },
+});
 
 export default AIComponent;

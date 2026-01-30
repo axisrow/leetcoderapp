@@ -17,13 +17,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import AIPuzzle from "./components/Puzzles.js";
 import LoginForm from "./components/LoginPage.js";
 import Auth from "./Auth.js";
+import { ThemeProvider } from "./ThemeContext.js";
 
 export default function App() {
   return (
-    <MainStack/>
-    //<Auth/>
-    )
-    
+    <ThemeProvider>
+      <MainStack />
+    </ThemeProvider>
+  );
 }
 
 const styles = StyleSheet.create({
