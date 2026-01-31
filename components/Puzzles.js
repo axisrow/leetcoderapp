@@ -19,7 +19,6 @@ import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
 import ThemedMarkdown from './ThemedMarkdown';
-import ThemeToggle from './ThemeToggle';
 
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
@@ -242,10 +241,6 @@ Provide feedback without revealing the correct answer yet. Focus on their thinki
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>JavaScript Puzzles</Text>
         <TouchableOpacity
@@ -331,10 +326,6 @@ Provide feedback without revealing the correct answer yet. Focus on their thinki
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    alignSelf: 'flex-end',
-    marginBottom: spacing.md,
   },
   scrollContent: {
     padding: spacing.lg,

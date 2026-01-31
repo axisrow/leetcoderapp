@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, Alert, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import api from '../config/axios';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
@@ -25,7 +25,7 @@ const RegisterForm = ({ navigation }) => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('https://leetcoderx.onrender.com/register', { name, email, password });
+      const response = await api.post('/api/register', { name, email, password });
       const token = response.data.token;
       await AsyncStorage.setItem('token', token);
       Alert.alert('Success', 'Account created!');

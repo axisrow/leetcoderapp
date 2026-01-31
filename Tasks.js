@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, View, Alert, TouchableOpacity, Text } from "react-native";
-import axios from "axios";
+import api from "./config/axios";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from './ThemeContext';
 import { typography, spacing, borderRadius, shadows } from './styles';
 import LoadingSpinner from './components/LoadingSpinner';
-import ThemeToggle from './components/ThemeToggle';
 
 const TaskList = () => {
   const { colors } = useTheme();
@@ -22,9 +21,9 @@ const TaskList = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const easyTasks = await axios.get("https://leetcoderx.onrender.com/easy");
-        const mediumTasks = await axios.get("https://leetcoderx.onrender.com/medium");
-        const hardTasks = await axios.get("https://leetcoderx.onrender.com/hard");
+        const easyTasks = await api.get("/api/easy");
+        const mediumTasks = await api.get("/api/medium");
+        const hardTasks = await api.get("/api/hard");
 
         setTasks({
           easy: easyTasks.data,
@@ -59,10 +58,6 @@ const TaskList = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Choose Difficulty</Text>
@@ -122,12 +117,6 @@ const TaskList = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
   },
   content: {
     flex: 1,

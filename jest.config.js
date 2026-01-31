@@ -8,6 +8,9 @@ module.exports = {
     '^@rneui/themed$': '<rootDir>/__mocks__/@rneui/themed.js',
     '^@rneui/base$': '<rootDir>/__mocks__/@rneui/base.js',
     '\\.gif$': '<rootDir>/__mocks__/fileMock.js',
+    '^../config/api$': '<rootDir>/__mocks__/config/api.js',
+    '^../config/axios$': '<rootDir>/__mocks__/config/axios.js',
+    '^./config/axios$': '<rootDir>/__mocks__/config/axios.js',
   },
   testPathIgnorePatterns: ['/node_modules/', '/.expo/'],
   collectCoverageFrom: [

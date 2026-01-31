@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import axios from "axios";
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { LEETCODE_API_URL } from '../config/api';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
-import ThemeToggle from './ThemeToggle';
 
 export const ApiFetcher = ({ route }) => {
   const { colors } = useTheme();
@@ -39,7 +39,7 @@ export const ApiFetcher = ({ route }) => {
   const fetching = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`https://leetcdtasker.onrender.com/select?titleSlug=${randtask}`);
+      const response = await axios.get(`${LEETCODE_API_URL}/select?titleSlug=${randtask}`);
       setTask(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -58,10 +58,6 @@ export const ApiFetcher = ({ route }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
@@ -102,12 +98,6 @@ export const ApiFetcher = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
   },
   scrollView: {
     flex: 1,

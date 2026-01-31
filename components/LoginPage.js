@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Alert, Platform, SafeAreaView, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TextInput, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import api from '../config/axios';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
@@ -17,14 +17,6 @@ export default function LoginPage({ navigation }) {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
-  const showMessage = (title, message) => {
-    if (Platform.OS === 'web') {
-      alert(`${title ? `${title}: ` : ''}${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
-  };
-
   const handleSubmit = async () => {
     setError('');
 
@@ -35,7 +27,7 @@ export default function LoginPage({ navigation }) {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('https://leetcoderx.onrender.com/login', { email, password });
+      const response = await api.post('/api/login', { email, password });
       const { token, message } = response.data || {};
 
       if (!token) {
@@ -46,7 +38,6 @@ export default function LoginPage({ navigation }) {
 
       await AsyncStorage.setItem('token', token);
       navigation.navigate('Homepage');
-      showMessage('Success', `Hello ${email}`);
     } catch (error) {
       const status = error.response?.status;
       const serverMessage = error.response?.data?.message;

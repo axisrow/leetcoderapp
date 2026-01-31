@@ -10,7 +10,6 @@ import { useTheme } from './ThemeContext';
 import { typography, spacing, borderRadius, shadows } from './styles';
 import ThemedMarkdown from './components/ThemedMarkdown';
 import LoadingSpinner from './components/LoadingSpinner';
-import ThemeToggle from './components/ThemeToggle';
 
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
@@ -95,10 +94,6 @@ Provide 3 different solutions, each with an explanation.`,
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>✨ Optimal Solutions</Text>
@@ -120,12 +115,6 @@ Provide 3 different solutions, each with an explanation.`,
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
   },
   scrollView: {
     flex: 1,

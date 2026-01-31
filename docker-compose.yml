@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: leetcoder
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: testuser
+      DB_PASS: testpass
+      DB_NAME: leetcoder
+      JWT_SECRET: test-secret-key
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

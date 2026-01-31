@@ -3,7 +3,6 @@ import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from 'react-na
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
-import ThemeToggle from './ThemeToggle';
 
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -15,10 +14,6 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={[styles.emoji]}>🏴‍☠️</Text>
@@ -44,12 +39,6 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
   },
   content: {
     flex: 1,

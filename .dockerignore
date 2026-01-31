@@ -1,0 +1,10 @@
+node_modules
+server/node_modules
+.expo
+.git
+*.md
+__tests__
+__mocks__
+web-build
+.env
+.env.local

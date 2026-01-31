@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { SafeAreaView, View, ScrollView, Alert, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
-import ThemeToggle from './ThemeToggle';
 
 export const Example = ({ navigation }) => {
   const { colors } = useTheme();
@@ -33,10 +32,6 @@ export const Example = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Code Playground</Text>
@@ -79,12 +74,6 @@ export const Example = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
   },
   scrollView: {
     flex: 1,

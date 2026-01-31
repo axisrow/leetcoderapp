@@ -2,7 +2,6 @@ import React from "react";
 import { StyleSheet, View, SafeAreaView, Text, TouchableOpacity } from "react-native";
 import { useTheme } from './ThemeContext';
 import { typography, spacing, borderRadius, shadows } from './styles';
-import ThemeToggle from './components/ThemeToggle';
 
 
 export default function Main({ navigation }) {
@@ -30,10 +29,6 @@ export default function Main({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.primary }]}>LeetCoderApp</Text>
@@ -83,12 +78,6 @@ export default function Main({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
   },
   content: {
     flex: 1,
