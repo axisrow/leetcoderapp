@@ -124,9 +124,16 @@ app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log("[DEBUG LOGIN] Attempting login for email:", email);
+
+    const allUsers = await database("users").select("id", "name", "email");
+    console.log("[DEBUG LOGIN] All users in database:", JSON.stringify(allUsers, null, 2));
+
     const user = await database("users").where({ email }).first();
+    console.log("[DEBUG LOGIN] Found user:", user ? { id: user.id, name: user.name, email: user.email } : "NOT FOUND");
 
     if (!user) {
+      console.log("[DEBUG LOGIN] User not found for email:", email);
       return res.status(401).json({ error: "Invalid email" });
     }
 
