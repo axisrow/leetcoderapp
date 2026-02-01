@@ -7,31 +7,23 @@ const { SignJWT, jwtVerify } = require("jose");
 
 const app = express();
 
-// Fetch problem details from LeetCode GraphQL API
+// Fetch problem details from alfa-leetcode-api (public proxy)
 async function fetchFromLeetCode(titleSlug) {
-  const query = `
-    query questionContent($titleSlug: String!) {
-      question(titleSlug: $titleSlug) {
-        content
-        hints
-      }
-    }
-  `;
-
   try {
-    const response = await fetch("https://leetcode.com/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables: { titleSlug }
-      })
-    });
+    const response = await fetch(
+      `https://alfa-leetcode-api.onrender.com/select?titleSlug=${titleSlug}`
+    );
+
+    if (!response.ok) {
+      console.error("LeetCode API error:", response.status);
+      return null;
+    }
 
     const data = await response.json();
-    return data?.data?.question || null;
+    return {
+      content: data.question || "",
+      hints: data.hints || []
+    };
   } catch (error) {
     console.error("Error fetching from LeetCode:", error);
     return null;

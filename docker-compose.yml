@@ -10,9 +10,18 @@ services:
     volumes:
       - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d leetcoder"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        EXPO_PUBLIC_ENV: local
+        EXPO_PUBLIC_API_KEY: ${EXPO_PUBLIC_API_KEY}
     ports:
       - "3001:3001"
     environment:
@@ -23,7 +32,8 @@ services:
       DB_NAME: leetcoder
       JWT_SECRET: test-secret-key
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
