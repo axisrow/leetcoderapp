@@ -21,7 +21,7 @@ fi
 
 # Запуск PostgreSQL в фоне
 echo "Starting PostgreSQL..."
-su postgres -c "pg_ctl -D $PGDATA -l /var/log/postgresql.log start"
+su postgres -c "pg_ctl -D $PGDATA -l $PGDATA/postgresql.log start"
 
 # Ожидание готовности PostgreSQL
 echo "Waiting for PostgreSQL..."
