@@ -1,21 +1,4 @@
 services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testpass
-      POSTGRES_DB: leetcoder
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U testuser -d leetcoder"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   app:
     build:
       context: .
@@ -25,15 +8,14 @@ services:
     ports:
       - "3001:3001"
     environment:
-      DB_HOST: postgres
+      DB_HOST: localhost
       DB_PORT: 5432
       DB_USER: testuser
       DB_PASS: testpass
       DB_NAME: leetcoder
       JWT_SECRET: test-secret-key
-    depends_on:
-      postgres:
-        condition: service_healthy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:

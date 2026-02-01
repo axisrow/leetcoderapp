@@ -7,29 +7,6 @@ const { SignJWT, jwtVerify } = require("jose");
 
 const app = express();
 
-// Fetch problem details from alfa-leetcode-api (public proxy)
-async function fetchFromLeetCode(titleSlug) {
-  try {
-    const response = await fetch(
-      `https://alfa-leetcode-api.onrender.com/select?titleSlug=${titleSlug}`
-    );
-
-    if (!response.ok) {
-      console.error("LeetCode API error:", response.status);
-      return null;
-    }
-
-    const data = await response.json();
-    return {
-      content: data.question || "",
-      hints: data.hints || []
-    };
-  } catch (error) {
-    console.error("Error fetching from LeetCode:", error);
-    return null;
-  }
-}
-
 app.use(express.json());
 app.use(cors());
 
@@ -110,29 +87,10 @@ app.get("/select", async (req, res) => {
       return res.status(404).json({ error: "Problem not found" });
     }
 
-    let question = problem.description || "";
-    let hints = [];
-
-    // If no description in DB, fetch from LeetCode API
-    if (!question) {
-      const leetcodeData = await fetchFromLeetCode(titleSlug);
-      if (leetcodeData) {
-        question = leetcodeData.content || "";
-        hints = leetcodeData.hints || [];
-
-        // Cache the description in database for future requests
-        if (question) {
-          await database("problems")
-            .where("titleslug", titleSlug)
-            .update({ description: question });
-        }
-      }
-    }
-
     res.json({
       questionTitle: problem.title,
-      question,
-      hints,
+      question: problem.description || "",
+      hints: [],
       difficulty: problem.difficulty,
       topics: problem.topics
     });
