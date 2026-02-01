@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, View, Alert, TouchableOpacity, Text } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { showAlert } from './utils/alert';
 import api from "./config/axios";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from './ThemeContext';
@@ -33,7 +34,7 @@ const TaskList = () => {
         setIsLoading(false);
       } catch (error) {
         console.error("Tasks fetching error:", error);
-        Alert.alert('Error', 'Failed to load tasks. Please try again.');
+        showAlert('Error', 'Failed to load tasks. Please try again.');
         setIsLoading(false);
       }
     };

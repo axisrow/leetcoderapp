@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Alert } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { showAlert } from '../utils/alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../ThemeContext';
 import { spacing, borderRadius, shadows } from '../styles';
@@ -18,7 +19,7 @@ const BurgerMenu = ({ navigation }) => {
 
     const handleProfile = () => {
         closeMenu();
-        Alert.alert('Profile', 'Profile page coming soon!');
+        showAlert('Profile', 'Profile page coming soon!');
     };
 
     const handleLogout = async () => {
@@ -31,7 +32,7 @@ const BurgerMenu = ({ navigation }) => {
             });
         } catch (error) {
             console.error('Logout error:', error);
-            Alert.alert('Error', 'Failed to logout. Please try again.');
+            showAlert('Error', 'Failed to logout. Please try again.');
         }
     };
 

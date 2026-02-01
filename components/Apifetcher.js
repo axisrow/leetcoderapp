@@ -1,18 +1,13 @@
-import React, { useCallback, useState, useRef, useEffect } from "react";
-import { View, SafeAreaView, ScrollView, Alert, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
-import {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} from "@google/generative-ai";
-import { useRoute, useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from "react";
+import { View, ScrollView, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
+import { showAlert } from '../utils/alert';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
 import ThemedMarkdown from './ThemedMarkdown';
 import ThemeToggle from './ThemeToggle';
-
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
+import { generateWithFallback } from '../utils/gemini';
 
 const Apifetcher = ({ route }) => {
   const { colors } = useTheme();
@@ -27,76 +22,39 @@ const Apifetcher = ({ route }) => {
 
   const fetchSolution = async () => {
     setIsLoading(true);
-    try {
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-      const result = await model.generateContentStream({
-        contents: [{
-          role: "user",
-          parts: [{
-            text: `Write 3 different JavaScript solutions to the following problem, with explanations:
+    const prompt = `Write 3 different JavaScript solutions to the following problem, with explanations:
 
 **Problem:**
 ${reslt}
 
-Provide 3 different solutions, each with an explanation.`,
-          }],
-        }],
-        generationConfig: {
-          temperature: 1.0,
-          topK: 1,
-          topP: 1,
-        },
-        safetySettings: [
-          {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-        ],
-      });
+Provide 3 different solutions, each with an explanation.`;
 
-      let fullText = '';
-      for await (const chunk of result.stream) {
-        fullText += chunk.text();
-        setSolution(fullText);
-      }
+    try {
+      await generateWithFallback(prompt, {
+        temperature: 1.0,
+        logPrefix: '[Apifetcher:Solution]',
+        onChunk: (fullText) => setSolution(fullText),
+      });
       setShowSolution(true);
       setIsLoading(false);
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error('[Apifetcher] ✗ Error (Solution):', error.message);
+      setSolution('⚠️ Не удалось получить решение. Попробуйте позже.');
+      setShowSolution(true);
       setIsLoading(false);
     }
   };
 
   const submitSolution = async () => {
     if (!userSolution.trim()) {
-      Alert.alert('Ошибка', 'Пожалуйста, введите ваше решение');
+      showAlert('Error', 'Please enter your solution');
       return;
     }
 
     setIsLoading(true);
-    try {
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-      const result = await model.generateContentStream({
-        contents: [{
-          role: "user",
-          parts: [{
-            text: `Analyze the user's solution to this coding problem and provide constructive feedback. Evaluate their approach, code quality, and logic. Be encouraging and educational.
+    const prompt = `Analyze the user's solution to this coding problem and provide constructive feedback. Evaluate their approach, code quality, and logic. Be encouraging and educational.
 
 **Problem:**
 ${reslt}
@@ -112,43 +70,19 @@ Provide detailed feedback on:
 3. Potential improvements or edge cases
 4. Time and space complexity if applicable
 
-Do not reveal the optimal solution yet. Focus on helping them improve their thinking.`,
-          }],
-        }],
-        generationConfig: {
-          temperature: 0.9,
-          topK: 1,
-          topP: 1,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-        ],
-      });
+Do not reveal the optimal solution yet. Focus on helping them improve their thinking.`;
 
-      let fullText = '';
-      for await (const chunk of result.stream) {
-        fullText += chunk.text();
-        setFeedback(fullText);
-      }
+    try {
+      await generateWithFallback(prompt, {
+        temperature: 0.9,
+        maxOutputTokens: 2048,
+        logPrefix: '[Apifetcher:Feedback]',
+        onChunk: (fullText) => setFeedback(fullText),
+      });
       setIsLoading(false);
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error('[Apifetcher] ✗ Error (Feedback):', error.message);
+      setFeedback('⚠️ Не удалось получить обратную связь. Попробуйте позже.');
       setIsLoading(false);
     }
   };
@@ -159,56 +93,27 @@ Do not reveal the optimal solution yet. Focus on helping them improve their thin
     const run = async () => {
       setIsLoading(true);
 
-      try {
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-        const result = await model.generateContentStream({
-          contents: [{
-            role: "user",
-            parts: [{
-              text: `Write description and question of this Leetcode problem without answer:
+      const prompt = `Write description and question of this Leetcode problem without answer:
 
 **Problem:**
-${randtask}`,
-            }],
-          }],
-          generationConfig: {
-            temperature: 0.9,
-            topK: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
-          },
-          safetySettings: [
-            {
-              category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            },
-            {
-              category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            },
-            {
-              category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            },
-            {
-              category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-              threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            },
-          ],
-        });
+${randtask}`;
 
-        let fullText = '';
-        for await (const chunk of result.stream) {
-          if (!isMounted) break;
-          fullText += chunk.text();
-          setReslt(fullText);
-        }
+      try {
+        await generateWithFallback(prompt, {
+          temperature: 0.9,
+          maxOutputTokens: 2048,
+          logPrefix: '[Apifetcher:Problem]',
+          onChunk: (fullText) => {
+            if (isMounted) setReslt(fullText);
+          },
+        });
         if (isMounted) setIsLoading(false);
       } catch (error) {
-        console.error('Error:', error.message);
-        if (isMounted) setIsLoading(false);
+        console.error('[Apifetcher] ✗ Error (Problem):', error.message);
+        if (isMounted) {
+          setReslt('⚠️ Не удалось загрузить задачу. Попробуйте позже.');
+          setIsLoading(false);
+        }
       }
     };
 
@@ -218,10 +123,6 @@ ${randtask}`,
       isMounted = false;
     };
   }, [randtask]);
-
-  if (isLoading) {
-    return <LoadingSpinner text="Загрузка..." />;
-  }
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.scrollContent}>
@@ -233,7 +134,7 @@ ${randtask}`,
         <Text style={[styles.title, { color: colors.text }]}>Coding Challenge</Text>
       </View>
 
-      {reslt && (
+      {reslt ? (
         <View style={styles.problemContainer}>
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>📋 Problem Description:</Text>
@@ -294,6 +195,8 @@ function solution() {
             </View>
           )}
         </View>
+      ) : (
+        <LoadingSpinner text="Loading..." />
       )}
     </ScrollView>
   );

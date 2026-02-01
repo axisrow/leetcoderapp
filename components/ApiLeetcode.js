@@ -3,17 +3,29 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Alert,
   View,
   Text,
   TouchableOpacity,
 } from "react-native";
+import { showAlert } from '../utils/alert';
 import axios from "axios";
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { LEETCODE_API_URL } from '../config/api';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
+
+const decodeHtmlEntities = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'");
+};
 
 export const ApiFetcher = ({ route }) => {
   const { colors } = useTheme();
@@ -24,11 +36,11 @@ export const ApiFetcher = ({ route }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const hints = () => {
-    if (hint <= task.hints.length && task.hints[hint] != undefined) {
+    if (task.hints && hint < task.hints.length && task.hints[hint] != undefined) {
       setHint(hint + 1);
-      Alert.alert('Hint', `${task.hints[hint]}`);
+      showAlert('Hint', `${task.hints[hint]}`);
     } else {
-      Alert.alert('Info', 'Sorry, no more hints available');
+      showAlert('Info', 'Sorry, no more hints available');
     }
   };
 
@@ -39,11 +51,23 @@ export const ApiFetcher = ({ route }) => {
   const fetching = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${LEETCODE_API_URL}/select?titleSlug=${randtask}`);
+      console.log('[ApiLeetcode] Fetching task:', randtask);
+      console.log('[ApiLeetcode] URL:', `${LEETCODE_API_URL}/select?titleSlug=${randtask}`);
+
+      const response = await axios.get(`${LEETCODE_API_URL}/select?titleSlug=${randtask}`, {
+        timeout: 15000, // 15 секунд таймаут
+      });
+
+      console.log('[ApiLeetcode] Response status:', response.status);
+      console.log('[ApiLeetcode] Response data:', JSON.stringify(response.data).slice(0, 200));
+      console.log('[ApiLeetcode] Has question:', !!response.data?.question);
+
       setTask(response.data);
       setIsLoading(false);
     } catch (error) {
-      Alert.alert("Error", "We can't load this task correctly, try again please");
+      console.error('[ApiLeetcode] Error:', error.message);
+      console.error('[ApiLeetcode] Error code:', error.code);
+      showAlert("Error", "We can't load this task correctly, try again please");
       setIsLoading(false);
     }
   };
@@ -68,7 +92,7 @@ export const ApiFetcher = ({ route }) => {
         {task && (
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
             <Text style={[styles.questionText, { color: colors.text }]}>
-              {task.question ? task.question.replace(/<[^>]*>/g, '') : 'Loading question...'}
+              {task.question ? decodeHtmlEntities(task.question.replace(/<[^>]*>/g, '')) : 'Loading question...'}
             </Text>
           </View>
         )}

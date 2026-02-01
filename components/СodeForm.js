@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { SafeAreaView, View, ScrollView, Alert, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
+import { SafeAreaView, View, ScrollView, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
+import { showAlert } from '../utils/alert';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 
@@ -25,7 +26,7 @@ export const Example = ({ navigation }) => {
       const evaluatedResult = safeEval(code);
       setResult(String(evaluatedResult));
     } catch (error) {
-      Alert.alert('Error', `${error.message}`);
+      showAlert('Error', `${error.message}`);
       setResult('Error');
     }
   };

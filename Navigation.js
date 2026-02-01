@@ -62,7 +62,7 @@ function NavigationContent() {
   }, []);
 
   if (checkingToken || !initialRoute) {
-    return <LoadingSpinner text="Загрузка..." />;
+    return <LoadingSpinner text="Loading..." />;
   }
 
   const getScreenOptions = (navigation) => ({

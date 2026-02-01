@@ -53,9 +53,9 @@ export const lightColors = {
     border: '#e2e8f0',
     borderLight: '#cbd5e1',
 
-    // Code block
-    codeBackground: '#f1f5f9',
-    codeText: '#1e293b',
+    // Code block - высококонтрастные цвета
+    codeBackground: '#1e293b',
+    codeText: '#e2e8f0',
 };
 
 // Dark theme colors
@@ -101,8 +101,8 @@ export const darkColors = {
     borderLight: '#475569',
 
     // Code block
-    codeBackground: '#1e293b',
-    codeText: '#e2e8f0',
+    codeBackground: '#334155',
+    codeText: '#f1f5f9',
 };
 
 export const ThemeProvider = ({ children }) => {

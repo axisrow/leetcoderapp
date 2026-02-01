@@ -7,6 +7,7 @@ module.exports = {
     '^@google/generative-ai$': '<rootDir>/__mocks__/@google/generative-ai.js',
     '^@rneui/themed$': '<rootDir>/__mocks__/@rneui/themed.js',
     '^@rneui/base$': '<rootDir>/__mocks__/@rneui/base.js',
+    '^react-native-marked$': '<rootDir>/__mocks__/react-native-marked.js',
     '\\.gif$': '<rootDir>/__mocks__/fileMock.js',
     '^../config/api$': '<rootDir>/__mocks__/config/api.js',
     '^../config/axios$': '<rootDir>/__mocks__/config/axios.js',

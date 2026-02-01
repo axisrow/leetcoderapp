@@ -1,17 +1,11 @@
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { View, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
-import {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} from "@google/generative-ai";
 import { useRoute } from '@react-navigation/native';
 import { useTheme } from './ThemeContext';
 import { typography, spacing, borderRadius, shadows } from './styles';
 import ThemedMarkdown from './components/ThemedMarkdown';
 import LoadingSpinner from './components/LoadingSpinner';
-
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
+import { generateWithFallback } from './utils/gemini';
 
 const AIComponent = () => {
   const { colors } = useTheme();
@@ -24,62 +18,23 @@ const AIComponent = () => {
   const run = useCallback(async () => {
     setIsLoading(true);
 
-    try {
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-      const result = await model.generateContentStream({
-        contents: [{
-          role: "user",
-          parts: [{
-            text: `Write 3 different JavaScript solutions to the following problem, with explanations:
+    const prompt = `Write 3 different JavaScript solutions to the following problem, with explanations:
 
 **Problem:**
 ${questionx}
 
-Provide 3 different solutions, each with an explanation.`,
-          }],
-        }],
-        generationConfig: {
-          temperature: 1.0,
-          topK: 1,
-          topP: 1,
-        },
-        safetySettings: [
-          {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-        ],
+Provide 3 different solutions, each with an explanation.`;
+
+    try {
+      await generateWithFallback(prompt, {
+        temperature: 1.0,
+        logPrefix: '[CheckAnswer]',
+        onChunk: (fullText) => setReslt(fullText),
       });
-
-      console.log('Result:', result);
-      console.log('Result.stream:', result.stream);
-      console.log('Result.response:', result.response);
-      console.log('Got stream, reading chunks...');
-
-      let fullText = '';
-      for await (const chunk of result.stream) {
-        console.log('Chunk received');
-        fullText += chunk.text();
-        setReslt(fullText);
-      }
-      console.log('Done, total length:', fullText.length);
       setIsLoading(false);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('[CheckAnswer] ✗ All models failed:', error.message);
+      setReslt('⚠️ Не удалось сгенерировать решение. Все модели недоступны (превышен лимит запросов). Попробуйте позже.');
       setIsLoading(false);
     }
   }, [questionx]);
@@ -87,10 +42,6 @@ Provide 3 different solutions, each with an explanation.`,
   useEffect(() => {
     run();
   }, [run]);
-
-  if (isLoading) {
-    return <LoadingSpinner text="Generating solutions..." />;
-  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -102,10 +53,12 @@ Provide 3 different solutions, each with an explanation.`,
           </Text>
         </View>
 
-        {reslt && (
+        {reslt ? (
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
             <ThemedMarkdown value={reslt} />
           </View>
+        ) : (
+          <LoadingSpinner text="Generating solutions..." />
         )}
       </ScrollView>
     </SafeAreaView>

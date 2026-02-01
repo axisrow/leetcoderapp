@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, View, Alert, SafeAreaView, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, TextInput, View, SafeAreaView, Text, TouchableOpacity } from 'react-native';
+import { showAlert } from '../utils/alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../config/axios';
 import { useTheme } from '../ThemeContext';
@@ -28,7 +29,7 @@ const RegisterForm = ({ navigation }) => {
       const response = await api.post('/api/register', { name, email, password });
       const token = response.data.token;
       await AsyncStorage.setItem('token', token);
-      Alert.alert('Success', 'Account created!');
+      showAlert('Success', 'Account created!');
       navigation.navigate('Login');
     } catch (error) {
       setError(error.response?.data?.message || 'Registration failed');
