@@ -6,6 +6,11 @@ DB_USER="${DB_USER:-testuser}"
 DB_PASS="${DB_PASS:-testpass}"
 DB_NAME="${DB_NAME:-leetcoder}"
 
+# Создание директории для сокета PostgreSQL
+mkdir -p /run/postgresql
+chown postgres:postgres /run/postgresql
+chmod 755 /run/postgresql
+
 # Инициализация PostgreSQL (если первый запуск)
 if [ ! -d "$PGDATA" ] || [ -z "$(ls -A $PGDATA 2>/dev/null)" ]; then
     echo "Initializing PostgreSQL..."
