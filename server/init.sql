@@ -8,6 +8,11 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(255) NOT NULL
 );
 
+-- Default users
+INSERT INTO users (name, email, password) VALUES
+('Jura3', 'jura3@example.com', '$2b$10$1nPVxISzixXUSQXQ9/mWaOxIy3hnXOjgMoGhsfMAN98WCRrB9d9wK')
+ON CONFLICT (email) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS problems (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255),

@@ -47,6 +47,9 @@ su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
 if [ -f /app/server/init.sql ]; then
     echo "Running init.sql..."
     su postgres -c "psql -d $DB_NAME -f /app/server/init.sql" || true
+    # Дать права на все таблицы пользователю
+    su postgres -c "psql -d $DB_NAME -c \"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $DB_USER;\""
+    su postgres -c "psql -d $DB_NAME -c \"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $DB_USER;\""
 fi
 
 echo "PostgreSQL ready!"
