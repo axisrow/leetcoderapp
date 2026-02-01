@@ -2,8 +2,8 @@ const ENV = process.env.EXPO_PUBLIC_ENV || 'local';
 
 const config = {
   local: {
-    baseURL: 'https://clihost-work1nw.sliplane.app',
-    leetcodeAPI: 'https://clihost-work1nw.sliplane.app'
+    baseURL: 'https://leetcoderapp.sliplane.app',
+    leetcodeAPI: 'https://leetcoderapp.sliplane.app'
   },
   production: {
     baseURL: 'https://leetcoderx.onrender.com',
