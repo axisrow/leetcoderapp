@@ -12,7 +12,7 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-// Мок для react-native-marked теперь в __mocks__/react-native-marked.js
+// Мок для marked теперь в __mocks__/marked.js
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),

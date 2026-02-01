@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 
 jest.mock('@google/generative-ai');
-jest.mock('react-native-marked', () => 'Markdown');
+jest.mock('react-native-render-html', () => 'RenderHTML');
 
 describe('CheckAnswer Component', () => {
   beforeEach(() => {

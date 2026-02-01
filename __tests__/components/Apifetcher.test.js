@@ -1,7 +1,7 @@
 import React from 'react';
 
 jest.mock('@google/generative-ai');
-jest.mock('react-native-marked', () => 'Markdown');
+jest.mock('react-native-render-html', () => 'RenderHTML');
 
 describe('Apifetcher Component', () => {
   beforeEach(() => {

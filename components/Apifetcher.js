@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
-import ThemedMarkdown from './ThemedMarkdown';
+import ThemedHTML from './ThemedHTML';
 import ThemeToggle from './ThemeToggle';
 import { generateWithFallback } from '../utils/gemini';
 
@@ -138,7 +138,7 @@ ${randtask}`;
         <View style={styles.problemContainer}>
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>📋 Problem Description:</Text>
-            <ThemedMarkdown value={reslt} />
+            <ThemedHTML value={reslt} contentType="markdown" />
           </View>
 
           <View style={styles.solutionSection}>
@@ -174,7 +174,7 @@ function solution() {
           {feedback && (
             <View style={[styles.card, styles.feedbackCard, { backgroundColor: colors.backgroundLight, borderColor: colors.border, borderLeftColor: colors.info }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>💡 Feedback on Your Solution:</Text>
-              <ThemedMarkdown value={feedback} />
+              <ThemedHTML value={feedback} contentType="markdown" />
             </View>
           )}
 
@@ -191,7 +191,7 @@ function solution() {
           {showSolution && solution && (
             <View style={[styles.card, styles.solutionCard, { backgroundColor: colors.backgroundLight, borderColor: colors.border, borderLeftColor: colors.success }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>✨ Optimal Solutions:</Text>
-              <ThemedMarkdown value={solution} />
+              <ThemedHTML value={solution} contentType="markdown" />
             </View>
           )}
         </View>

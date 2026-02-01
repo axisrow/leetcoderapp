@@ -12,7 +12,7 @@ import { showAlert } from '../utils/alert';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
-import ThemedMarkdown from './ThemedMarkdown';
+import ThemedHTML from './ThemedHTML';
 import { generateWithFallback } from '../utils/gemini';
 
 const AIPuzzle = () => {
@@ -163,7 +163,7 @@ Provide feedback without revealing the correct answer yet. Focus on their thinki
 
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Question:</Text>
-            <ThemedMarkdown value={reslt} />
+            <ThemedHTML value={reslt} contentType="markdown" />
           </View>
 
           <View style={styles.answerSection}>
@@ -192,7 +192,7 @@ Provide feedback without revealing the correct answer yet. Focus on their thinki
           {feedback && (
             <View style={[styles.card, styles.feedbackCard, { backgroundColor: colors.backgroundLight, borderColor: colors.border, borderLeftColor: colors.info }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>💡 Feedback:</Text>
-              <ThemedMarkdown value={feedback} />
+              <ThemedHTML value={feedback} contentType="markdown" />
             </View>
           )}
 
@@ -209,7 +209,7 @@ Provide feedback without revealing the correct answer yet. Focus on their thinki
           {showCorrectAnswer && answers && (
             <View style={[styles.card, styles.answerCard, { backgroundColor: colors.backgroundLight, borderColor: colors.border, borderLeftColor: colors.success }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>✨ Correct Answer:</Text>
-              <ThemedMarkdown value={answers} />
+              <ThemedHTML value={answers} contentType="markdown" />
             </View>
           )}
         </View>

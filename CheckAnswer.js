@@ -3,7 +3,7 @@ import { View, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity } fr
 import { useRoute } from '@react-navigation/native';
 import { useTheme } from './ThemeContext';
 import { typography, spacing, borderRadius, shadows } from './styles';
-import ThemedMarkdown from './components/ThemedMarkdown';
+import ThemedHTML from './components/ThemedHTML';
 import LoadingSpinner from './components/LoadingSpinner';
 import { generateWithFallback } from './utils/gemini';
 
@@ -55,7 +55,7 @@ Provide 3 different solutions, each with an explanation.`;
 
         {reslt ? (
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
-            <ThemedMarkdown value={reslt} />
+            <ThemedHTML value={reslt} contentType="markdown" />
           </View>
         ) : (
           <LoadingSpinner text="Generating solutions..." />

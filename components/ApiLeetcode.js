@@ -14,18 +14,8 @@ import { LEETCODE_API_URL } from '../config/api';
 import { useTheme } from '../ThemeContext';
 import { typography, spacing, borderRadius, shadows } from '../styles';
 import LoadingSpinner from './LoadingSpinner';
+import ThemedHTML from './ThemedHTML';
 
-const decodeHtmlEntities = (text) => {
-  if (!text) return '';
-  return text
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'");
-};
 
 export const ApiFetcher = ({ route }) => {
   const { colors } = useTheme();
@@ -91,9 +81,11 @@ export const ApiFetcher = ({ route }) => {
 
         {task && (
           <View style={[styles.card, { backgroundColor: colors.backgroundLight, borderColor: colors.border }]}>
-            <Text style={[styles.questionText, { color: colors.text }]}>
-              {task.question ? decodeHtmlEntities(task.question.replace(/<[^>]*>/g, '')) : 'Loading question...'}
-            </Text>
+            {task.question ? (
+              <ThemedHTML value={task.question} contentType="html" />
+            ) : (
+              <Text style={[styles.questionText, { color: colors.text }]}>Loading question...</Text>
+            )}
           </View>
         )}
 
