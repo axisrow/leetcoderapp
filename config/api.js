@@ -11,6 +11,10 @@ const config = {
   }
 };
 
+console.log('[API Config] Environment:', ENV);
+console.log('[API Config] API_BASE_URL:', config[ENV].baseURL);
+console.log('[API Config] LEETCODE_API_URL:', config[ENV].leetcodeAPI);
+
 export const API_BASE_URL = config[ENV].baseURL;
 export const LEETCODE_API_URL = config[ENV].leetcodeAPI;
 export const API_ENV = ENV;

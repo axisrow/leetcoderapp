@@ -1,5 +1,42 @@
 # LeetCoder App
 
+## Быстрый старт (разработка)
+
+```bash
+npm run dev
+```
+
+Эта команда одновременно запускает:
+- Локальный сервер на http://localhost:3001
+- Web-клиент на http://localhost:19006
+
+---
+
+## Окружения
+
+Приложение поддерживает два окружения, управляемых переменной `EXPO_PUBLIC_ENV` в файле `.env`:
+
+| Окружение | API URL | Команда |
+|-----------|---------|---------|
+| `local` | http://localhost:3001 | `npm run dev` |
+| `production` | https://leetcoderx.onrender.com | `npm run dev:prod` |
+
+### Переключение окружения
+
+**Вариант 1: Через .env файл**
+```bash
+# .env
+EXPO_PUBLIC_ENV=local      # или production
+```
+
+**Вариант 2: Через npm-скрипты**
+```bash
+npm run dev        # local (сервер + клиент)
+npm run dev:prod   # production (только клиент)
+```
+
+---
+
 ## Клиент (React Native / Expo)
 
 ### Запуск в web-режиме
