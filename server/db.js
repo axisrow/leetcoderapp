@@ -10,11 +10,11 @@ require('dotenv').config({ path: path.resolve(__dirname, envFile) });
 const database = require('knex')({
     client: 'pg',
     connection: {
-      host : process.env.DB_HOST,
-      port : process.env.DB_PORT,
-      user : process.env.DB_USER,
-      password : process.env.DB_PASS,
-      database : process.env.DB_NAME,
+      host : process.env.DB_HOST || '/run/postgresql',
+      port : process.env.DB_PORT || 5432,
+      user : process.env.DB_USER || 'testuser',
+      password : process.env.DB_PASS || 'testpass',
+      database : process.env.DB_NAME || 'leetcoder',
       ssl: false,
     }
   });
